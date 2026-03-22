@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StickerWorld ✨</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;800&family=Nunito:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#fef9f0; --card:#fff; --accent1:#ff6b6b; --accent2:#ffd93d;
+    --accent3:#6bcb77; --accent4:#4d96ff; --accent5:#c77dff;
+    --text:#2d2d2d; --text2:#888; --border:#f0e8d5;
+    --shadow:0 8px 32px rgba(0,0,0,.08); --radius:20px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
+  body::before{content:'';position:fixed;width:600px;height:600px;background:radial-gradient(circle,#ffd93d33 0%,transparent 70%);top:-200px;right:-200px;pointer-events:none;z-index:0;}
+  body::after{content:'';position:fixed;width:500px;height:500px;background:radial-gradient(circle,#c77dff22 0%,transparent 70%);bottom:-150px;left:-150px;pointer-events:none;z-index:0;}
+
+  /* ── HEADER ── */
+  header{position:sticky;top:0;z-index:100;background:rgba(254,249,240,.95);backdrop-filter:blur(14px);border-bottom:2px solid var(--border);padding:0 28px;display:flex;align-items:center;justify-content:space-between;height:68px;gap:12px;}
+  .logo{font-family:'Baloo 2',cursive;font-size:26px;font-weight:800;background:linear-gradient(135deg,#ff6b6b,#ffd93d,#6bcb77,#4d96ff,#c77dff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;white-space:nowrap;}
+  .header-nav{display:flex;gap:8px;flex-shrink:0;}
+  .header-nav a{text-decoration:none;font-weight:700;font-size:13px;padding:7px 14px;border-radius:50px;color:var(--text2);transition:all .2s;cursor:pointer;white-space:nowrap;}
+  .header-nav a:hover{background:var(--text);color:#fff;}
+  .btn-dl-all{background:linear-gradient(135deg,#4d96ff,#c77dff)!important;color:#fff!important;}
+
+  /* ── VERSION TOGGLE ── */
+  .version-toggle{position:relative;z-index:1;display:flex;align-items:center;gap:10px;padding:18px 32px 0;flex-wrap:wrap;}
+  .ver-label{font-size:13px;font-weight:700;color:var(--text2);}
+  .ver-btn{padding:5px 14px;border-radius:50px;border:2px solid var(--border);background:#fff;cursor:pointer;font-family:'Nunito',sans-serif;font-size:12px;font-weight:700;transition:all .2s;color:var(--text2);}
+  .ver-btn.active{background:var(--text);color:#fff;border-color:var(--text);}
+
+  /* ── FEATURED PACKS (TOP) ── */
+  .packs-top{position:relative;z-index:1;padding:20px 28px 28px;}
+  .packs-top-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;}
+  .packs-top-title{font-family:'Baloo 2',cursive;font-size:26px;font-weight:800;}
+  .packs-top-sub{font-size:13px;color:var(--text2);font-weight:600;}
+  .packs-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:16px;}
+
+  .pack-card{border-radius:24px;padding:22px;cursor:pointer;transition:all .28s cubic-bezier(.34,1.56,.64,1);position:relative;overflow:hidden;border:3px solid transparent;}
+  .pack-card:hover{transform:translateY(-7px) scale(1.02);box-shadow:0 24px 48px rgba(0,0,0,.16);}
+  .pack-card.active-pack{border-color:#fff;box-shadow:0 0 0 4px rgba(77,150,255,.4),0 16px 40px rgba(0,0,0,.18);transform:translateY(-4px) scale(1.02);}
+  .pack-card-bg{position:absolute;inset:0;opacity:.1;font-size:100px;line-height:1;display:flex;align-items:center;justify-content:center;pointer-events:none;filter:blur(6px);}
+  .pack-preview{display:flex;gap:4px;margin-bottom:12px;flex-wrap:wrap;position:relative;z-index:1;}
+  .pack-preview span{font-size:28px;transition:transform .2s;}
+  .pack-card:hover .pack-preview span{animation:wiggle .4s ease;}
+  @keyframes wiggle{0%,100%{transform:rotate(0)}30%{transform:rotate(-8deg)}70%{transform:rotate(8deg)}}
+  .pack-card h3{font-family:'Baloo 2',cursive;font-size:18px;font-weight:800;color:#fff;margin-bottom:3px;position:relative;z-index:1;}
+  .pack-card p{font-size:12px;color:rgba(255,255,255,.82);font-weight:600;position:relative;z-index:1;}
+  .pack-meta{display:flex;align-items:center;justify-content:space-between;margin-top:10px;position:relative;z-index:1;}
+  .pack-tag{background:rgba(255,255,255,.22);color:#fff;font-size:10px;font-weight:800;letter-spacing:.5px;padding:3px 10px;border-radius:50px;text-transform:uppercase;}
+  .pack-count-badge{background:rgba(255,255,255,.18);color:#fff;font-size:11px;font-weight:700;padding:2px 9px;border-radius:50px;}
+  .pack-arrow{position:absolute;bottom:14px;right:14px;background:rgba(255,255,255,.2);color:#fff;border:none;border-radius:50%;width:30px;height:30px;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s;}
+  .pack-card:hover .pack-arrow{background:rgba(255,255,255,.35);}
+
+  /* ── DIVIDER / BACK ROW ── */
+  .sticker-section-header{position:relative;z-index:1;display:flex;align-items:center;gap:14px;padding:0 28px 16px;flex-wrap:wrap;}
+  .back-btn{display:flex;align-items:center;gap:6px;background:#fff;border:2px solid var(--border);border-radius:50px;padding:7px 16px;cursor:pointer;font-family:'Nunito',sans-serif;font-size:13px;font-weight:800;color:var(--text2);transition:all .2s;}
+  .back-btn:hover{background:var(--text);color:#fff;border-color:var(--text);}
+  .sticker-section-title{font-family:'Baloo 2',cursive;font-size:22px;font-weight:800;}
+  .sticker-section-count{font-size:12px;color:var(--text2);font-weight:600;background:var(--border);padding:4px 12px;border-radius:50px;}
+  .dl-set-btn{margin-left:auto;padding:7px 16px;border-radius:50px;border:none;background:linear-gradient(135deg,#4d96ff,#c77dff);color:#fff;font-family:'Nunito',sans-serif;font-size:12px;font-weight:800;cursor:pointer;transition:all .2s;}
+  .dl-set-btn:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(77,150,255,.35);}
+
+  /* ── STICKER GRID ── */
+  .sticker-area{position:relative;z-index:1;padding:0 24px 60px;}
+  .sticker-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(128px,1fr));gap:14px;}
+  .sticker-card{background:var(--card);border-radius:var(--radius);border:2px solid var(--border);padding:18px 10px 12px;text-align:center;cursor:pointer;transition:all .25s cubic-bezier(.34,1.56,.64,1);position:relative;overflow:visible;box-shadow:0 2px 8px rgba(0,0,0,.04);animation:cardIn .35s ease both;}
+  @keyframes cardIn{from{opacity:0;transform:scale(.85) translateY(18px)}to{opacity:1;transform:scale(1) translateY(0)}}
+  .sticker-card:hover{transform:translateY(-8px) scale(1.06) rotate(1deg);box-shadow:0 20px 40px rgba(0,0,0,.12);border-color:transparent;z-index:10;}
+  .sticker-card:hover .sticker-emoji{transform:scale(1.3) rotate(-5deg);}
+  .sticker-card:hover .card-dl-btn{transform:translateX(-50%) scale(1);}
+  .card-dl-btn{position:absolute;bottom:-12px;left:50%;transform:translateX(-50%) scale(0);background:linear-gradient(135deg,#4d96ff,#c77dff);color:#fff;border:none;border-radius:50px;font-size:9px;font-weight:800;padding:4px 10px;cursor:pointer;white-space:nowrap;transition:transform .2s;z-index:20;}
+  .sticker-badge{position:absolute;top:-8px;right:-8px;font-size:10px;font-weight:800;letter-spacing:.5px;padding:3px 8px;border-radius:50px;text-transform:uppercase;}
+  .badge-new{background:var(--accent5);color:#fff;}
+  .badge-hot{background:var(--accent1);color:#fff;}
+  .badge-ghibli{background:linear-gradient(135deg,#74c0fc,#6bcb77);color:#fff;}
+  .skin-hint{position:absolute;top:6px;left:8px;font-size:9px;color:#ccc;font-weight:800;}
+  .sticker-emoji{font-size:50px;line-height:1;display:block;margin-bottom:8px;transition:transform .3s cubic-bezier(.34,1.56,.64,1);}
+  .sticker-name{font-size:11px;font-weight:700;color:var(--text2);line-height:1.3;display:block;}
+  .sticker-card:nth-child(5n+1){border-color:#ffe0e0}.sticker-card:nth-child(5n+2){border-color:#fff3cc}
+  .sticker-card:nth-child(5n+3){border-color:#d8f5e0}.sticker-card:nth-child(5n+4){border-color:#d9eaff}
+  .sticker-card:nth-child(5n+5){border-color:#eed9ff}
+
+  /* ── EMPTY / NO RESULTS ── */
+  .no-results{text-align:center;padding:70px 32px;display:none;}
+  .no-results.show{display:block;}
+  .no-results span{font-size:56px;display:block;margin-bottom:14px;}
+  .no-results p{font-size:17px;font-weight:700;color:var(--text2);}
+
+  /* ── MODAL ── */
+  .modal-overlay{display:none;position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.5);backdrop-filter:blur(8px);align-items:center;justify-content:center;padding:20px;}
+  .modal-overlay.open{display:flex;}
+  .modal{background:#fff;border-radius:32px;padding:36px 28px;max-width:400px;width:100%;text-align:center;animation:modalIn .35s cubic-bezier(.34,1.56,.64,1);position:relative;max-height:90vh;overflow-y:auto;}
+  @keyframes modalIn{from{transform:scale(.7) translateY(40px);opacity:0}to{transform:scale(1) translateY(0);opacity:1}}
+  .modal-close{position:absolute;top:14px;right:18px;background:none;border:none;font-size:22px;cursor:pointer;color:var(--text2);}
+
+  .modal-emoji-wrap{position:relative;display:block;margin-bottom:6px;}
+  .modal-emoji{font-size:90px;display:block;transition:transform .3s cubic-bezier(.34,1.56,.64,1);}
+  .modal-emoji-wrap:hover .modal-emoji{transform:scale(1.08) translateY(-4px);}
+
+  .modal-dl-instant{display:flex;align-items:center;justify-content:center;gap:7px;margin:8px auto 0;background:linear-gradient(135deg,#4d96ff,#c77dff);color:#fff;border:none;border-radius:50px;padding:11px 28px;font-family:'Nunito',sans-serif;font-size:15px;font-weight:800;cursor:pointer;width:100%;box-shadow:0 4px 18px rgba(77,150,255,.35);transition:all .25s cubic-bezier(.34,1.56,.64,1);letter-spacing:.3px;}
+  .modal-dl-instant:hover{transform:translateY(-3px) scale(1.03);box-shadow:0 10px 28px rgba(77,150,255,.45);}
+  .modal-dl-instant:active{transform:scale(.97);}
+  .modal-dl-instant.done{background:linear-gradient(135deg,#6bcb77,#4ecdc4);}
+
+  .modal-name{font-family:'Baloo 2',cursive;font-size:24px;font-weight:800;margin-top:14px;margin-bottom:3px;}
+  .modal-cat{font-size:13px;color:var(--text2);font-weight:600;margin-bottom:14px;}
+  .skin-label{font-size:12px;font-weight:700;color:var(--text2);margin-bottom:8px;}
+  .skin-tones{display:flex;gap:8px;justify-content:center;margin-bottom:14px;flex-wrap:wrap;}
+  .skin-btn{width:34px;height:34px;border-radius:50%;border:3px solid transparent;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;transition:all .2s;background:var(--bg);}
+  .skin-btn:hover,.skin-btn.active{border-color:var(--accent4);transform:scale(1.2);}
+  .modal-variants{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:18px;}
+  .modal-variant{background:var(--bg);border:2px solid var(--border);border-radius:14px;padding:8px 12px;font-size:26px;cursor:pointer;transition:all .2s;}
+  .modal-variant:hover{transform:scale(1.2);border-color:var(--accent4);}
+  .modal-actions{display:flex;gap:8px;}
+  .btn{flex:1;padding:11px;border-radius:50px;border:none;cursor:pointer;font-family:'Nunito',sans-serif;font-size:13px;font-weight:800;transition:all .2s;}
+  .btn-close{background:var(--bg);border:2px solid var(--border);color:var(--text);}
+  .btn:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(0,0,0,.12);}
+
+  /* ── TOAST ── */
+  .toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(100px);background:#2d2d2d;color:#fff;padding:11px 22px;border-radius:50px;font-weight:700;font-size:14px;z-index:9999;transition:transform .3s cubic-bezier(.34,1.56,.64,1);pointer-events:none;}
+  .toast.show{transform:translateX(-50%) translateY(0);}
+
+  /* ── PROGRESS ── */
+  .dl-progress{position:fixed;bottom:76px;left:50%;transform:translateX(-50%);background:#fff;border-radius:16px;padding:14px 22px;box-shadow:0 8px 32px rgba(0,0,0,.15);font-weight:700;font-size:13px;z-index:9999;display:none;align-items:center;gap:12px;}
+  .dl-progress.show{display:flex;}
+  .dl-bar-wrap{width:140px;height:8px;background:var(--border);border-radius:50px;overflow:hidden;}
+  .dl-bar{height:100%;background:linear-gradient(90deg,#4d96ff,#c77dff);border-radius:50px;transition:width .25s;width:0%;}
+
+  footer{position:relative;z-index:1;text-align:center;padding:28px;border-top:2px solid var(--border);color:var(--text2);font-size:13px;font-weight:600;}
+
+  @media(max-width:768px){
+    header{padding:0 14px;gap:8px;}
+    .header-search{width:130px;}
+    .logo{font-size:20px;}
+    .packs-top{padding:14px 14px 20px;}
+    .sticker-area{padding:0 10px 40px;}
+    .sticker-grid{grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:10px;}
+    .sticker-emoji{font-size:40px;}
+    .version-toggle{padding:14px 14px 0;}
+    .sticker-section-header{padding:0 14px 14px;}
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="logo">✨ StickerWorld</div>
+  <nav class="header-nav">
+    <a class="btn-dl-all" onclick="downloadAll()">⬇ Download All</a>
+  </nav>
+</header>
+
+
+
+<!-- ★ FEATURED PACKS — TOP OF PAGE ★ -->
+<div class="packs-top">
+  <div class="packs-top-header">
+    <div>
+      <div class="packs-top-title">🎁 Featured Packs</div>
+      <div class="packs-top-sub">Click a pack to browse its stickers</div>
+    </div>
+  </div>
+  <div class="packs-grid" id="packsGrid"></div>
+</div>
+
+<!-- STICKER SECTION (shown after pack click) -->
+<div id="stickerSection">
+  <div class="sticker-section-header">
+    <button class="back-btn" onclick="goBackToPacks()">← Back</button>
+    <div class="sticker-section-title" id="sectionTitle"></div>
+    <div class="sticker-section-count" id="sectionCount"></div>
+    <button class="dl-set-btn" onclick="downloadCategory()">⬇ Download Set</button>
+  </div>
+  <div class="sticker-area">
+    <div class="sticker-grid" id="stickerGrid"></div>
+    <div class="no-results" id="noResults"><span>🔭</span><p>No stickers found!</p></div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModalDirect()">✕</button>
+    <div class="modal-emoji-wrap">
+      <span class="modal-emoji" id="modalEmoji"></span>
+      <button class="modal-dl-instant" id="modalDlBtn" onclick="downloadSticker()">
+        <span class="dl-icon">⬇</span>
+        <span class="dl-text">Download PNG</span>
+      </button>
+    </div>
+    <div class="modal-name" id="modalName"></div>
+    <div class="modal-cat" id="modalCat"></div>
+    <div id="skinToneSection" style="display:none">
+      <div class="skin-label">🎨 Skin Tone</div>
+      <div class="skin-tones" id="skinTones"></div>
+    </div>
+    <div class="modal-variants" id="modalVariants"></div>
+    <div class="modal-actions">
+      <button class="btn btn-close" onclick="closeModalDirect()">Close</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<div class="dl-progress" id="dlProgress">
+  <span>⬇ Saving...</span>
+  <div class="dl-bar-wrap"><div class="dl-bar" id="dlBar"></div></div>
+  <span id="dlPct">0%</span>
+</div>
+
+<footer>Made with ❤️ by StickerWorld · 1400+ stickers for every emotion, gesture & vibe ✨</footer>
+
+<script>
+// ── DATA ──────────────────────────────────────────────
+const SKIN_TONES  = ['','🏻','🏼','🏽','🏾','🏿'];
+const SKIN_LABELS = ['Default','Light','Medium-Light','Medium','Medium-Dark','Dark'];
+
+const GHIBLI_MAP  = {'😊':'🌿','❤️':'🌸','😂':'🍃','🌟':'✨','🔥':'🌊','😭':'🌧️','😍':'🌺','👍':'🌾','🥺':'🐱','🎉':'🍀','💯':'🌙','😅':'🦆','🤣':'🐟','😢':'💧','🙏':'🌻','👋':'🍃','✌️':'🌿','🤙':'🌊','🤞':'🌱','🫶':'🌸'};
+const OUTLINED_MAP= {'😊':'🙂','❤️':'🤍','😂':'😆','🌟':'⭐','🔥':'💫','😭':'😿','😍':'😻','👍':'👆','🥺':'🥹','🎉':'🎊','👋':'🖐','✌️':'☝️','🤞':'🫰','🤙':'☎️','🙏':'🤲','🫶':'💞','👏':'🙌'};
+const PIXEL_MAP   = {'😊':'🟡','❤️':'🟥','😂':'🔵','🌟':'🔶','🔥':'🟠','😭':'🔷','😍':'🩷','👍':'🟩','🥺':'🩵','🎉':'🎊'};
+
+// Each pack has: name, desc, emojis (preview), gradient, tag, cat (maps to sticker category)
+const PACKS = [
+  {id:'popular',  name:'🔥 Most Used',       desc:'Top 1000 most-sent stickers ever',    emojis:['😂','❤️','🔥','🥺','👍'], gradient:'linear-gradient(135deg,#ff6b6b,#ffd93d)',  tag:'Mega Pack',     count:20},
+  {id:'emotions', name:'😊 Emotions',        desc:'Every mood & feeling covered',         emojis:['😍','😭','😡','🤩','🥴'], gradient:'linear-gradient(135deg,#ffd93d,#ff9f43)',  tag:'Emotions Pack', count:20},
+  {id:'gestures', name:'✋ Hand Gestures',   desc:'Every hand sign & human gesture',      emojis:['👋','✌️','🤞','🤙','🙏'], gradient:'linear-gradient(135deg,#ff8e53,#ffd93d)',  tag:'Gestures Pack', count:40},
+  {id:'ghibli',   name:'🌿 Ghibli Magic',   desc:'Studio Ghibli-inspired stickers',      emojis:['🌿','🌸','🌊','🔥','🌙'], gradient:'linear-gradient(135deg,#74b9ff,#6bcb77)',  tag:'Ghibli Pack',   count:15},
+  {id:'animals',  name:'🐾 Animal Kingdom', desc:'All the animals, all the vibes',        emojis:['🦁','🐼','🦊','🦄','🐉'], gradient:'linear-gradient(135deg,#6bcb77,#4d96ff)',  tag:'Animals Pack',  count:15},
+  {id:'food',     name:'🍕 Foodie Heaven',  desc:"Every food sticker you'll ever need",   emojis:['🍕','🍣','🧋','☕','🍩'], gradient:'linear-gradient(135deg,#ffd93d,#ff6b6b)',  tag:'Food Pack',     count:15},
+  {id:'nature',   name:'🌸 Nature',         desc:'Seasons, plants & the great outdoors',  emojis:['🌸','🌈','🌊','🍂','☀️'], gradient:'linear-gradient(135deg,#6bcb77,#a8e6cf)',  tag:'Nature Pack',   count:10},
+  {id:'symbols',  name:'✨ Symbols & Magic', desc:'Sparkles, signs & sorcery',            emojis:['✨','💫','🔮','🌈','⚡'], gradient:'linear-gradient(135deg,#c77dff,#4d96ff)',  tag:'Magic Pack',    count:10},
+  {id:'travel',   name:'✈️ Travel',         desc:'Destinations, transport & adventure',   emojis:['✈️','🏝️','🗼','🌆','🏔️'], gradient:'linear-gradient(135deg,#4d96ff,#74c0fc)',  tag:'Travel Pack',   count:10},
+  {id:'objects',  name:'🎸 Objects',        desc:'Tools, gadgets & everyday things',      emojis:['🎸','📱','🎮','🎨','🎁'], gradient:'linear-gradient(135deg,#ff8e53,#c77dff)',  tag:'Objects Pack',  count:10},
+  {id:'new',      name:'🆕 New Arrivals',   desc:'Fresh stickers just added',             emojis:['🫧','🪼','🩷','🫏','🪷'], gradient:'linear-gradient(135deg,#c77dff,#ff6b6b)',  tag:'New Pack',      count:15},
+];
+
+const STICKERS = [
+  // POPULAR
+  {id:1, emoji:'😊',name:'Happy Face',     cat:'popular',badge:'hot',  variants:['😄','😁','😀','🙂','☺️']},
+  {id:2, emoji:'❤️',name:'Red Heart',      cat:'popular',badge:'hot',  variants:['🧡','💛','💚','💙','💜']},
+  {id:3, emoji:'😂',name:'Tears of Joy',   cat:'popular',badge:'hot',  variants:['🤣','😆','😄','😁','😹']},
+  {id:4, emoji:'🌟',name:'Glowing Star',   cat:'popular',badge:'hot',  variants:['⭐','✨','💫','🌠','🌌']},
+  {id:5, emoji:'🔥',name:'Fire',           cat:'popular',badge:'hot',  variants:['💥','⚡','🌋','☄️','💢']},
+  {id:6, emoji:'😭',name:'Loudly Crying',  cat:'popular',badge:'hot',  variants:['😢','😿','💧','🌧️','🥲']},
+  {id:7, emoji:'😍',name:'Heart Eyes',     cat:'popular',badge:'hot',  variants:['🥰','😻','💕','💞','💓']},
+  {id:8, emoji:'👍',name:'Thumbs Up',      cat:'popular',badge:'hot',  variants:['👏','🙌','✌️','🤞','🤙'],hasSkin:true},
+  {id:9, emoji:'🥺',name:'Pleading Face',  cat:'popular',badge:'hot',  variants:['🥹','😞','😔','🙁','😕']},
+  {id:10,emoji:'🎉',name:'Party Popper',   cat:'popular',badge:'hot',  variants:['🎊','🎈','🥳','🎆','🎇']},
+  {id:11,emoji:'💯',name:'Hundred Points', cat:'popular',badge:'hot',  variants:['💢','‼️','❗','✅','☑️']},
+  {id:12,emoji:'😅',name:'Sweating Smile', cat:'popular',             variants:['😓','😰','😨','😧','😦']},
+  {id:13,emoji:'🤣',name:'Rolling Laugh',  cat:'popular',badge:'hot',  variants:['😂','😆','🤪','😜','😝']},
+  {id:14,emoji:'😢',name:'Crying Face',    cat:'popular',             variants:['😿','💧','☔','🌂','😥']},
+  {id:15,emoji:'🙏',name:'Praying Hands',  cat:'popular',badge:'hot',  variants:['🫶','💞','🤲','👐','🤝'],hasSkin:true},
+  {id:16,emoji:'💀',name:'Skull',          cat:'popular',             variants:['☠️','🦴','💣','⚰️','🪦']},
+  {id:17,emoji:'🤩',name:'Star Struck',    cat:'popular',             variants:['😻','💖','🤯','😲','🫢']},
+  {id:18,emoji:'😎',name:'Cool Face',      cat:'popular',             variants:['🕶️','🤠','🥳','🤑','😏']},
+  {id:19,emoji:'🫶',name:'Heart Hands',    cat:'popular',badge:'new',  variants:['🤲','💕','❤️','💗','💓'],hasSkin:true},
+  {id:20,emoji:'🤔',name:'Thinking Face',  cat:'popular',             variants:['🧐','🤨','🫤','😶','😑']},
+  // EMOTIONS
+  {id:21,emoji:'😀',name:'Grinning Face',  cat:'emotions',            variants:['😃','😄','😁','😆','🤣']},
+  {id:22,emoji:'🥰',name:'Smiling Hearts', cat:'emotions',            variants:['😍','💕','🥹','😊','☺️']},
+  {id:23,emoji:'😡',name:'Angry Face',     cat:'emotions',badge:'hot',variants:['😤','🤬','😠','👿','💢']},
+  {id:24,emoji:'😱',name:'Shocked Face',   cat:'emotions',            variants:['😲','🫢','🤯','😳','👀']},
+  {id:25,emoji:'🤗',name:'Hugging Face',   cat:'emotions',            variants:['🫂','🤝','💪','🫁','🫀']},
+  {id:26,emoji:'😴',name:'Sleeping Face',  cat:'emotions',            variants:['💤','🛌','🥱','😪','🌙']},
+  {id:27,emoji:'🤮',name:'Sick Face',      cat:'emotions',            variants:['🤢','🤧','😷','🏥','💊']},
+  {id:28,emoji:'😤',name:'Steaming Face',  cat:'emotions',            variants:['😠','😡','🤬','💢','☁️']},
+  {id:29,emoji:'🫠',name:'Melting Face',   cat:'emotions',badge:'new',variants:['😵','🌀','💫','🥴','😮']},
+  {id:30,emoji:'🥴',name:'Woozy Face',     cat:'emotions',            variants:['😵','🌀','😵‍💫','🤪','🫨']},
+  {id:31,emoji:'😇',name:'Angel Face',     cat:'emotions',            variants:['👼','🕊️','☁️','✝️','🌤️']},
+  {id:32,emoji:'😈',name:'Devil Face',     cat:'emotions',            variants:['👿','😈','🔱','⛓️','🔥']},
+  {id:33,emoji:'🤭',name:'Giggling',       cat:'emotions',            variants:['😏','😛','😝','😜','🤪']},
+  {id:34,emoji:'😶‍🌫️',name:'Face in Cloud',cat:'emotions',badge:'new',variants:['😶','🌫️','😑','😐','🫥']},
+  {id:35,emoji:'🥸',name:'Disguised Face', cat:'emotions',badge:'new',variants:['🕵️','🎭','🤡','🃏','🎪']},
+  {id:36,emoji:'🤑',name:'Money Face',     cat:'emotions',            variants:['💰','💵','🤩','😍','💸']},
+  {id:37,emoji:'😏',name:'Smirking Face',  cat:'emotions',            variants:['😒','🙄','😑','😐','🫤']},
+  {id:38,emoji:'🫡',name:'Saluting Face',  cat:'emotions',badge:'new',variants:['💪','🙌','👊','🤝','✋']},
+  {id:39,emoji:'🥲',name:'Smiling Tear',   cat:'emotions',            variants:['😊','😭','🥹','😢','😿']},
+  {id:40,emoji:'😬',name:'Grimacing',      cat:'emotions',            variants:['😳','😨','😧','😦','😱']},
+  // GESTURES
+  {id:50, emoji:'👋',name:'Waving Hand',       cat:'gestures',badge:'hot', hasSkin:true,variants:['🤚','🖐','✋','🫱','🫲']},
+  {id:51, emoji:'🤚',name:'Raised Back Hand',  cat:'gestures',              hasSkin:true,variants:['✋','🖐','🖖','👋','🫴']},
+  {id:52, emoji:'✋',name:'Raised Hand',        cat:'gestures',badge:'hot', hasSkin:true,variants:['🖐','🤚','🖖','👋','🫴']},
+  {id:53, emoji:'🖖',name:'Vulcan Salute',      cat:'gestures',badge:'hot', hasSkin:true,variants:['✌️','🤞','🤟','🖐','✋']},
+  {id:54, emoji:'👌',name:'OK Hand',            cat:'gestures',badge:'hot', hasSkin:true,variants:['✅','🤌','🤏','✌️','👍']},
+  {id:55, emoji:'🤌',name:'Pinched Fingers',    cat:'gestures',badge:'hot', hasSkin:true,variants:['🤏','👌','✌️','🖐','🫰']},
+  {id:56, emoji:'🤏',name:'Pinching Hand',      cat:'gestures',              hasSkin:true,variants:['🤌','👌','✌️','🖐','🫰']},
+  {id:57, emoji:'✌️',name:'Victory / Peace',    cat:'gestures',badge:'hot', hasSkin:true,variants:['🤞','🖖','🤟','✋','🖐']},
+  {id:58, emoji:'🤞',name:'Crossed Fingers',    cat:'gestures',badge:'hot', hasSkin:true,variants:['✌️','🖖','🤟','🫰','👍']},
+  {id:59, emoji:'🤟',name:'Love-You Sign',      cat:'gestures',badge:'hot', hasSkin:true,variants:['🤘','🤙','✌️','🖖','🤞']},
+  {id:60, emoji:'🤘',name:'Sign of Horns',      cat:'gestures',              hasSkin:true,variants:['🤙','🤟','✌️','🖖','👊']},
+  {id:61, emoji:'🤙',name:'Call Me Hand',       cat:'gestures',badge:'hot', hasSkin:true,variants:['📞','☎️','🤘','🤟','🖐']},
+  {id:62, emoji:'👈',name:'Point Left',         cat:'gestures',              hasSkin:true,variants:['👉','☝️','👆','👇','🫵']},
+  {id:63, emoji:'👉',name:'Point Right',        cat:'gestures',badge:'hot', hasSkin:true,variants:['👈','☝️','👆','👇','🫵']},
+  {id:64, emoji:'☝️',name:'Index Up',           cat:'gestures',              hasSkin:true,variants:['👆','👇','👈','👉','🫵']},
+  {id:65, emoji:'👆',name:'Backhand Up',        cat:'gestures',              hasSkin:true,variants:['☝️','👇','👈','👉','🫵']},
+  {id:66, emoji:'👇',name:'Backhand Down',      cat:'gestures',              hasSkin:true,variants:['👆','☝️','👈','👉','🫵']},
+  {id:67, emoji:'🫵',name:'Index Pointing You', cat:'gestures',badge:'new', hasSkin:true,variants:['👉','👆','☝️','👇','👈']},
+  {id:68, emoji:'👍',name:'Thumbs Up',          cat:'gestures',badge:'hot', hasSkin:true,variants:['👏','🙌','✊','💪','🤜']},
+  {id:69, emoji:'👎',name:'Thumbs Down',        cat:'gestures',              hasSkin:true,variants:['🚫','❌','✋','🛑','💀']},
+  {id:70, emoji:'✊',name:'Raised Fist',         cat:'gestures',badge:'hot', hasSkin:true,variants:['👊','🤛','🤜','💪','🥊']},
+  {id:71, emoji:'👊',name:'Oncoming Fist',      cat:'gestures',              hasSkin:true,variants:['✊','🤛','🤜','💥','🥊']},
+  {id:72, emoji:'🤛',name:'Left Fist Bump',     cat:'gestures',              hasSkin:true,variants:['🤜','✊','👊','💪','🥊']},
+  {id:73, emoji:'🤜',name:'Right Fist Bump',    cat:'gestures',              hasSkin:true,variants:['🤛','✊','👊','💪','🥊']},
+  {id:74, emoji:'👏',name:'Clapping Hands',     cat:'gestures',badge:'hot', hasSkin:true,variants:['🙌','🤲','🫶','👐','🤝']},
+  {id:75, emoji:'🙌',name:'Raising Hands',      cat:'gestures',badge:'hot', hasSkin:true,variants:['👏','🤲','🫶','👐','🎉']},
+  {id:76, emoji:'🤲',name:'Palms Up Together',  cat:'gestures',              hasSkin:true,variants:['🙏','🫶','👐','🤝','🙌']},
+  {id:77, emoji:'🙏',name:'Folded Hands',       cat:'gestures',badge:'hot', hasSkin:true,variants:['🫶','🤲','👐','🤝','🙌']},
+  {id:78, emoji:'🤝',name:'Handshake',          cat:'gestures',badge:'hot', hasSkin:true,variants:['🙏','🫱','🫲','🤜','🤛']},
+  {id:79, emoji:'💪',name:'Flexed Biceps',      cat:'gestures',badge:'hot', hasSkin:true,variants:['🦾','🏋️','🤸','⚡','🔥']},
+  {id:80, emoji:'🦾',name:'Mechanical Arm',     cat:'gestures',badge:'new',              variants:['💪','🤖','⚙️','🦿','🔩']},
+  {id:81, emoji:'🫱',name:'Hand Rightward',     cat:'gestures',badge:'new', hasSkin:true,variants:['🫲','🤝','🫴','✋','🖐']},
+  {id:82, emoji:'🫲',name:'Hand Leftward',      cat:'gestures',badge:'new', hasSkin:true,variants:['🫱','🤝','🫴','✋','🖐']},
+  {id:83, emoji:'🫳',name:'Hand Palm Down',     cat:'gestures',badge:'new', hasSkin:true,variants:['🫴','✋','🖐','🤚','🫱']},
+  {id:84, emoji:'🫴',name:'Hand Palm Up',       cat:'gestures',badge:'new', hasSkin:true,variants:['🫳','✋','🖐','🤚','🙌']},
+  {id:85, emoji:'🫰',name:'Snap Fingers',       cat:'gestures',badge:'new', hasSkin:true,variants:['🤌','🤏','👌','✌️','🖐']},
+  {id:86, emoji:'🖕',name:'Middle Finger',      cat:'gestures',              hasSkin:true,variants:['👆','☝️','👇','🫵','🤚']},
+  {id:87, emoji:'👐',name:'Open Hands',         cat:'gestures',              hasSkin:true,variants:['🙌','🤲','🫶','🤝','💕']},
+  {id:88, emoji:'🫶',name:'Heart Hands',        cat:'gestures',badge:'hot', hasSkin:true,variants:['❤️','💕','🤲','👐','🙌']},
+  {id:89, emoji:'🖐',name:'Hand Splayed',       cat:'gestures',              hasSkin:true,variants:['✋','🤚','🖖','👋','🫴']},
+  {id:90, emoji:'🤌',name:'Italian Pinch',      cat:'gestures',badge:'hot', hasSkin:true,variants:['🤏','👌','🫰','✌️','🖐']},
+  // GHIBLI
+  {id:140,emoji:'🌿',name:'Totoro Forest',  cat:'ghibli',badge:'ghibli',variants:['🍃','🌱','🌾','🎋','🌲']},
+  {id:141,emoji:'🐱',name:'Catbus',         cat:'ghibli',badge:'ghibli',variants:['🚌','😸','🌙','🌟','🌿']},
+  {id:142,emoji:'🌸',name:'Spirited Sakura',cat:'ghibli',badge:'ghibli',variants:['🌺','🌼','🌻','💐','🏵️']},
+  {id:143,emoji:'🌊',name:'Ponyo Wave',     cat:'ghibli',badge:'ghibli',variants:['🐟','💙','🌧️','⛈️','🫧']},
+  {id:144,emoji:'🔥',name:'Calcifer Flame', cat:'ghibli',badge:'ghibli',variants:['💥','⚡','🕯️','🪔','✨']},
+  {id:145,emoji:'🏰',name:"Howl's Castle",  cat:'ghibli',badge:'ghibli',variants:['🌆','🗼','🌃','🌉','🏯']},
+  {id:146,emoji:'🌙',name:'Moonlit Night',  cat:'ghibli',badge:'ghibli',variants:['⭐','🌟','🌌','🌃','✨']},
+  {id:147,emoji:'🦅',name:'Nausicaa Bird',  cat:'ghibli',badge:'ghibli',variants:['🕊️','🦋','🐛','🌿','💚']},
+  {id:148,emoji:'🌧️',name:'Rainy Spirit',   cat:'ghibli',badge:'ghibli',variants:['☔','🌂','💧','🌊','⛈️']},
+  {id:149,emoji:'🛁',name:'Bathhouse',      cat:'ghibli',badge:'ghibli',variants:['♨️','🌸','🐉','🌿','🍜']},
+  {id:150,emoji:'✉️',name:"Kiki's Letter",  cat:'ghibli',badge:'ghibli',variants:['🧹','🐈‍⬛','🌆','🌙','✨']},
+  {id:151,emoji:'🌾',name:'Valley of Wind', cat:'ghibli',badge:'ghibli',variants:['🌱','🌿','🌊','💨','🏔️']},
+  {id:152,emoji:'🎋',name:'Bamboo Forest',  cat:'ghibli',badge:'ghibli',variants:['🐼','🌿','🌲','🍃','🌳']},
+  {id:153,emoji:'🐟',name:'Ponyo Fish',     cat:'ghibli',badge:'ghibli',variants:['🌊','💧','🐠','🐡','🌈']},
+  {id:154,emoji:'💨',name:'Wind Whispers',  cat:'ghibli',badge:'ghibli',variants:['🌬️','🌪️','🍃','⛅','🌤️']},
+  // ANIMALS
+  {id:101,emoji:'🐱',name:'Cat Face',    cat:'animals',            variants:['😸','😹','😺','😻','🐾']},
+  {id:102,emoji:'🐶',name:'Dog Face',    cat:'animals',badge:'hot',variants:['🐕','🦮','🐩','🦴','🐾']},
+  {id:103,emoji:'🦊',name:'Fox',         cat:'animals',            variants:['🦝','🐺','🦨','🦡','🐇']},
+  {id:104,emoji:'🐼',name:'Panda',       cat:'animals',badge:'hot',variants:['🐨','🐻','🧸','🪆','🦥']},
+  {id:105,emoji:'🦋',name:'Butterfly',   cat:'animals',            variants:['🐛','🐝','🪲','🦗','🪰']},
+  {id:106,emoji:'🐸',name:'Frog',        cat:'animals',            variants:['🐊','🦎','🐢','🐍','🦖']},
+  {id:107,emoji:'🦆',name:'Duck',        cat:'animals',            variants:['🐔','🐧','🦅','🦉','🦜']},
+  {id:108,emoji:'🐙',name:'Octopus',     cat:'animals',            variants:['🦑','🦞','🦀','🐡','🐟']},
+  {id:109,emoji:'🦁',name:'Lion',        cat:'animals',badge:'hot',variants:['🐯','🐆','🐅','🦓','🦏']},
+  {id:110,emoji:'🐬',name:'Dolphin',     cat:'animals',            variants:['🐋','🦈','🐳','🐟','🦭']},
+  {id:111,emoji:'🦄',name:'Unicorn',     cat:'animals',badge:'hot',variants:['🐴','🦓','🌈','✨','🌟']},
+  {id:112,emoji:'🦔',name:'Hedgehog',    cat:'animals',badge:'new',variants:['🐿️','🦫','🦦','🦥','🐾']},
+  {id:113,emoji:'🦩',name:'Flamingo',    cat:'animals',            variants:['🦢','🕊️','🦅','🦉','🦜']},
+  {id:114,emoji:'🐲',name:'Dragon',      cat:'animals',badge:'hot',variants:['🐉','🦕','🦖','🔥','⚡']},
+  {id:115,emoji:'🐺',name:'Wolf',        cat:'animals',            variants:['🦊','🐱','🦝','🐾','🌙']},
+  // FOOD
+  {id:120,emoji:'🍕',name:'Pizza',       cat:'food',badge:'hot',variants:['🍔','🌮','🥙','🍣','🍜']},
+  {id:121,emoji:'🍣',name:'Sushi',       cat:'food',            variants:['🍱','🥟','🍜','🍙','🍡']},
+  {id:122,emoji:'🧋',name:'Bubble Tea',  cat:'food',badge:'hot',variants:['🍵','☕','🫖','🧃','🥤']},
+  {id:123,emoji:'🍩',name:'Doughnut',    cat:'food',            variants:['🍪','🎂','🍰','🧁','🍫']},
+  {id:124,emoji:'🌮',name:'Taco',        cat:'food',            variants:['🌯','🥙','🥗','🍔','🌭']},
+  {id:125,emoji:'🍓',name:'Strawberry',  cat:'food',            variants:['🍇','🍊','🍋','🍑','🫐']},
+  {id:126,emoji:'🍦',name:'Ice Cream',   cat:'food',            variants:['🍧','🍨','🍡','🧁','🍰']},
+  {id:127,emoji:'🥑',name:'Avocado',     cat:'food',badge:'hot',variants:['🥦','🥕','🌽','🍆','🫑']},
+  {id:128,emoji:'🍜',name:'Noodles',     cat:'food',            variants:['🍝','🍛','🥘','🫕','🍲']},
+  {id:129,emoji:'☕',name:'Coffee',      cat:'food',badge:'hot',variants:['🫖','🍵','🧋','🥛','🍺']},
+  {id:130,emoji:'🧇',name:'Waffle',      cat:'food',badge:'new',variants:['🥞','🍳','🧈','🫙','🥚']},
+  {id:131,emoji:'🌶️',name:'Chili Pepper',cat:'food',            variants:['🫑','🧄','🧅','🥜','🌿']},
+  {id:132,emoji:'🍱',name:'Bento Box',   cat:'food',            variants:['🥢','🍣','🍙','🍡','🫙']},
+  {id:133,emoji:'🍄',name:'Mushroom',    cat:'food',            variants:['🌿','🍃','🌱','☘️','🌾']},
+  {id:134,emoji:'🧃',name:'Juice Box',   cat:'food',            variants:['🥤','🍹','🍶','🫖','🍵']},
+  // NATURE
+  {id:160,emoji:'🌸',name:'Cherry Blossom',cat:'nature',badge:'hot',variants:['🌺','🌼','🌻','💐','🏵️']},
+  {id:161,emoji:'🌈',name:'Rainbow',       cat:'nature',badge:'hot',variants:['⛅','☀️','🌤️','⛈️','❄️']},
+  {id:162,emoji:'🌊',name:'Wave',          cat:'nature',            variants:['💧','🫧','🌧️','☔','❄️']},
+  {id:163,emoji:'🍂',name:'Autumn Leaves', cat:'nature',            variants:['🍁','🍃','🌿','🌾','🎃']},
+  {id:164,emoji:'🌙',name:'Crescent Moon', cat:'nature',            variants:['🌛','🌝','🌚','🌑','⭐']},
+  {id:165,emoji:'☀️',name:'Sun',           cat:'nature',badge:'hot',variants:['🌤️','⛅','🌅','🌄','🌞']},
+  {id:166,emoji:'❄️',name:'Snowflake',     cat:'nature',            variants:['☃️','⛄','🌨️','🏔️','🧊']},
+  {id:167,emoji:'🌋',name:'Volcano',       cat:'nature',            variants:['🔥','💥','🏔️','⛰️','🗻']},
+  {id:168,emoji:'🌺',name:'Hibiscus',      cat:'nature',            variants:['🌹','🌷','🥀','💐','🌸']},
+  {id:169,emoji:'🍀',name:'Four Leaf',     cat:'nature',            variants:['☘️','🌿','🌱','🌾','🎋']},
+  // SYMBOLS
+  {id:170,emoji:'✨',name:'Sparkles',      cat:'symbols',badge:'hot',variants:['💫','⭐','🌟','💥','🎆']},
+  {id:171,emoji:'💫',name:'Dizzy Star',    cat:'symbols',            variants:['⭐','🌟','✨','☀️','💥']},
+  {id:172,emoji:'🎵',name:'Music Note',    cat:'symbols',badge:'hot',variants:['🎶','🎤','🎸','🎹','🥁']},
+  {id:173,emoji:'💎',name:'Diamond',       cat:'symbols',            variants:['💍','👑','🏆','🥇','⭐']},
+  {id:174,emoji:'🌀',name:'Cyclone',       cat:'symbols',            variants:['💫','🔄','♾️','🌊','💥']},
+  {id:175,emoji:'⚡',name:'Lightning',     cat:'symbols',badge:'hot',variants:['🌩️','💥','⚡','🔱','⚔️']},
+  {id:176,emoji:'🔮',name:'Crystal Ball',  cat:'symbols',            variants:['🌀','💫','🎱','🔯','⭐']},
+  {id:177,emoji:'☯️',name:'Yin Yang',      cat:'symbols',            variants:['☮️','✡️','🕉️','☪️','🔯']},
+  {id:178,emoji:'🎯',name:'Bullseye',      cat:'symbols',badge:'hot',variants:['🏹','🎳','⚽','🏆','🥇']},
+  {id:179,emoji:'🌐',name:'Globe',         cat:'symbols',            variants:['🗺️','🧭','🌍','🌎','🌏']},
+  // TRAVEL
+  {id:180,emoji:'✈️',name:'Airplane',      cat:'travel',badge:'hot',variants:['🚀','🛸','🛩️','🚁','🛻']},
+  {id:181,emoji:'🏝️',name:'Desert Island', cat:'travel',            variants:['🌴','☀️','🌊','🏖️','🐚']},
+  {id:182,emoji:'🗼',name:'Eiffel Tower',  cat:'travel',badge:'hot',variants:['🗽','🏯','🏰','⛩️','🕌']},
+  {id:183,emoji:'🌆',name:'Cityscape',     cat:'travel',            variants:['🌃','🌉','🌇','🌁','🏙️']},
+  {id:184,emoji:'🏔️',name:'Mountain',      cat:'travel',            variants:['⛰️','🗻','🌋','🏕️','🏞️']},
+  {id:185,emoji:'🏖️',name:'Beach',         cat:'travel',badge:'hot',variants:['🏄','🤿','🏊','🛶','⛵']},
+  {id:186,emoji:'🎡',name:'Ferris Wheel',  cat:'travel',            variants:['🎢','🎠','🎪','🎭','🎰']},
+  {id:187,emoji:'🌸',name:'Japan',         cat:'travel',            variants:['⛩️','🗾','🍜','🎎','🥢']},
+  {id:188,emoji:'🏕️',name:'Camping',       cat:'travel',            variants:['⛺','🔥','🌲','🌙','🏔️']},
+  {id:189,emoji:'🚂',name:'Train',         cat:'travel',            variants:['🚃','🚆','🚇','🚊','🚝']},
+  // OBJECTS
+  {id:190,emoji:'🎸',name:'Guitar',        cat:'objects',badge:'hot',variants:['🎹','🎺','🎻','🥁','🪕']},
+  {id:191,emoji:'📱',name:'Smartphone',    cat:'objects',badge:'hot',variants:['💻','⌨️','🖥️','🖨️','📺']},
+  {id:192,emoji:'📚',name:'Books',         cat:'objects',            variants:['📖','📝','✏️','🖊️','📒']},
+  {id:193,emoji:'🎮',name:'Video Game',    cat:'objects',badge:'hot',variants:['🕹️','👾','🎲','♟️','🃏']},
+  {id:194,emoji:'🎨',name:'Art Palette',   cat:'objects',badge:'hot',variants:['🖌️','🖼️','🎭','✏️','🖍️']},
+  {id:195,emoji:'🏆',name:'Trophy',        cat:'objects',            variants:['🥇','🥈','🥉','🏅','🎖️']},
+  {id:196,emoji:'🔑',name:'Key',           cat:'objects',            variants:['🗝️','🔐','🔒','🔓','🚪']},
+  {id:197,emoji:'🎁',name:'Gift Box',      cat:'objects',badge:'hot',variants:['🎀','🎊','🎉','🎈','🥳']},
+  {id:198,emoji:'📷',name:'Camera',        cat:'objects',            variants:['📸','🎥','🎞️','📹','🎬']},
+  {id:199,emoji:'🧲',name:'Magnet',        cat:'objects',            variants:['⚙️','🔧','🔩','⛏️','🛠️']},
+  // NEW
+  {id:200,emoji:'🫧',name:'Bubbles',       cat:'new',badge:'new',variants:['💧','🌊','💦','🪣','🐟']},
+  {id:201,emoji:'🪸',name:'Coral',         cat:'new',badge:'new',variants:['🐚','🌊','🐠','🦀','🦞']},
+  {id:202,emoji:'🫨',name:'Shaking Face',  cat:'new',badge:'new',variants:['😵‍💫','🌀','💫','😲','🤯']},
+  {id:203,emoji:'🩷',name:'Pink Heart',    cat:'new',badge:'new',variants:['🩶','🩵','🫶','💜','💛']},
+  {id:204,emoji:'🪼',name:'Jellyfish',     cat:'new',badge:'new',variants:['🌊','🐟','💜','✨','🫧']},
+  {id:205,emoji:'🫏',name:'Donkey',        cat:'new',badge:'new',variants:['🐴','🐎','🦄','🦓','🐾']},
+  {id:206,emoji:'🫎',name:'Moose',         cat:'new',badge:'new',variants:['🦌','🐾','🌲','🍂','⛄']},
+  {id:207,emoji:'🪿',name:'Goose',         cat:'new',badge:'new',variants:['🦆','🐦','🦢','🕊️','🌊']},
+  {id:208,emoji:'🪭',name:'Folding Fan',   cat:'new',badge:'new',variants:['🎋','🌸','🎎','🍵','⛩️']},
+  {id:209,emoji:'🫸',name:'Hand Right',    cat:'new',badge:'new',hasSkin:true,variants:['🫷','👉','👈','🫶','🤝']},
+  {id:210,emoji:'🩻',name:'X-Ray',         cat:'new',badge:'new',variants:['🏥','💊','🩺','🔬','🧬']},
+  {id:211,emoji:'🫛',name:'Pea Pod',       cat:'new',badge:'new',variants:['🥬','🥦','🌿','🌱','🥕']},
+  {id:212,emoji:'🪷',name:'Lotus',         cat:'new',badge:'new',variants:['🌸','🌺','🏵️','💐','🌼']},
+  {id:213,emoji:'🫚',name:'Olive Oil',     cat:'new',badge:'new',variants:['🍶','🫙','🧂','🌿','🫒']},
+  {id:214,emoji:'🪮',name:'Hair Brush',    cat:'new',badge:'new',variants:['✂️','💈','💅','💄','🪞']},
+];
+
+// ── STATE ─────────────────────────────────────────────
+let currentCat     = null;   // null = showing packs homepage
+let currentVersion = 'classic';
+let currentSearch  = '';
+let activeSkin     = '';
+let selectedSticker= null;
+
+// ── VERSION ────────────────────────────────────────────
+function getVersionEmoji(s) {
+  if (currentVersion==='ghibli')   return GHIBLI_MAP[s.emoji]   || s.emoji;
+  if (currentVersion==='outlined') return OUTLINED_MAP[s.emoji] || s.emoji;
+  if (currentVersion==='pixel')    return PIXEL_MAP[s.emoji]    || s.emoji;
+  return s.emoji;
+}
+function setVersion(v,btn) {
+  currentVersion=v;
+  document.querySelectorAll('.ver-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  if(currentCat) renderGrid();
+}
+
+// ── PACKS ──────────────────────────────────────────────
+function renderPacks() {
+  const grid = document.getElementById('packsGrid');
+  grid.innerHTML = PACKS.map(p => {
+    const realCount = STICKERS.filter(s=>s.cat===p.id).length;
+    return `
+    <div class="pack-card ${currentCat===p.id?'active-pack':''}" onclick="openPack('${p.id}')" style="background:${p.gradient}">
+      <div class="pack-card-bg">${p.emojis[0]}</div>
+      <div class="pack-preview">${p.emojis.map(e=>`<span>${e}</span>`).join('')}</div>
+      <h3>${p.name}</h3>
+      <p>${p.desc}</p>
+      <div class="pack-meta">
+        <span class="pack-tag">${p.tag}</span>
+        <span class="pack-count-badge">${realCount} stickers</span>
+      </div>
+      <button class="pack-arrow">→</button>
+    </div>`;
+  }).join('');
+}
+
+function openPack(catId) {
+  currentCat = catId;
+  currentSearch = '';
+  renderPacks(); // re-render to show active highlight
+  renderGrid();
+  // Smooth scroll to stickers
+  setTimeout(()=>{
+    document.getElementById('stickerSection').scrollIntoView({behavior:'smooth',block:'start'});
+  },80);
+}
+
+function goBackToPacks() {
+  currentCat = null;
+  currentSearch = '';
+  renderPacks();
+  hideStickers();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function hideStickers() {
+  document.getElementById('stickerGrid').innerHTML = '';
+  document.getElementById('noResults').classList.remove('show');
+  document.getElementById('sectionTitle').textContent = '';
+  document.getElementById('sectionCount').textContent = '';
+}
+
+// ── GRID ───────────────────────────────────────────────
+function getFiltered() {
+  return STICKERS.filter(s => {
+    const mc = !currentCat || s.cat===currentCat;
+    const ms = !currentSearch || s.name.toLowerCase().includes(currentSearch.toLowerCase()) || s.emoji.includes(currentSearch);
+    return mc && ms;
+  });
+}
+
+function renderGrid() {
+  if (!currentCat && !currentSearch) { hideStickers(); return; }
+
+  const f    = getFiltered();
+  const grid = document.getElementById('stickerGrid');
+  const no   = document.getElementById('noResults');
+
+  const pack = PACKS.find(p=>p.id===currentCat);
+  document.getElementById('sectionTitle').textContent = currentSearch
+    ? `🔍 "${currentSearch}"`
+    : (pack ? pack.name : 'All Stickers');
+  document.getElementById('sectionCount').textContent = `${f.length} stickers`;
+
+  if (!f.length) { grid.innerHTML=''; no.classList.add('show'); return; }
+  no.classList.remove('show');
+
+  grid.innerHTML = f.map((s,i) => {
+    const em   = getVersionEmoji(s);
+    const badge= s.badge ? `<span class="sticker-badge badge-${s.badge}">${s.badge==='ghibli'?'🌿 Ghibli':s.badge==='new'?'✨ New':'🔥 Hot'}</span>` : '';
+    const skin = s.hasSkin ? `<span class="skin-hint">🎨</span>` : '';
+    return `<div class="sticker-card" style="animation-delay:${i*.02}s" onclick="openModal(${s.id})">
+      ${badge}${skin}
+      <span class="sticker-emoji">${em}</span>
+      <span class="sticker-name">${s.name}</span>
+      <button class="card-dl-btn" onclick="event.stopPropagation();quickDL('${em}','${s.name}')">⬇ Save</button>
+    </div>`;
+  }).join('');
+}
+
+
+// ── MODAL ──────────────────────────────────────────────
+function openModal(id) {
+  const s = STICKERS.find(x=>x.id===id);
+  if(!s) return;
+  selectedSticker=s; activeSkin='';
+  const em = getVersionEmoji(s);
+  document.getElementById('modalEmoji').textContent = em;
+  document.getElementById('modalName').textContent  = s.name;
+  document.getElementById('modalCat').textContent   = `Pack: ${s.cat.charAt(0).toUpperCase()+s.cat.slice(1)}`;
+
+  const skinSec = document.getElementById('skinToneSection');
+  if (s.hasSkin) {
+    skinSec.style.display='block';
+    document.getElementById('skinTones').innerHTML = SKIN_TONES.map((t,i)=>
+      `<button class="skin-btn ${i===0?'active':''}" title="${SKIN_LABELS[i]}" onclick="applySkin('${s.emoji}','${t}',this)">${i===0?'🖐':'🖐'+t}</button>`
+    ).join('');
+  } else { skinSec.style.display='none'; }
+
+  document.getElementById('modalVariants').innerHTML = (s.variants||[]).map(v=>
+    `<div class="modal-variant" onclick="selectVariant('${v}')">${v}</div>`).join('');
+
+  // Reset download btn
+  const btn=document.getElementById('modalDlBtn');
+  if(btn){ btn.classList.remove('done'); btn.querySelector('.dl-text').textContent='Download PNG'; btn.querySelector('.dl-icon').textContent='⬇'; }
+
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+function applySkin(base,tone,btn) {
+  activeSkin=tone;
+  document.querySelectorAll('.skin-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('modalEmoji').textContent=base+tone;
+}
+function selectVariant(e){ document.getElementById('modalEmoji').textContent=e; }
+function closeModal(ev)   { if(ev.target===document.getElementById('modalOverlay')) closeModalDirect(); }
+function closeModalDirect(){ document.getElementById('modalOverlay').classList.remove('open'); }
+
+// ── TOAST ──────────────────────────────────────────────
+function toast(msg) {
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2200);
+}
+
+// ── DOWNLOAD ──────────────────────────────────────────
+function emojiCanvas(emoji, size=512) {
+  const c=document.createElement('canvas');
+  c.width=size; c.height=size;
+  const ctx=c.getContext('2d');
+  ctx.clearRect(0,0,size,size);
+  ctx.font=`${Math.floor(size*.72)}px serif`;
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText(emoji, size/2, size/2+size*.04);
+  return c;
+}
+
+function triggerDL(canvas, filename) {
+  canvas.toBlob(blob => {
+    const url = URL.createObjectURL(blob);
+    const a   = document.createElement('a');
+    a.href     = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(()=>URL.revokeObjectURL(url), 1000);
+  }, 'image/png');
+}
+
+function downloadSticker() {
+  const em = document.getElementById('modalEmoji').textContent;
+  const n  = (document.getElementById('modalName').textContent||'sticker').replace(/[^a-z0-9]/gi,'_');
+  triggerDL(emojiCanvas(em,512), `sticker_${n}.png`);
+  toast('⬇ Saved to Downloads!');
+  const btn=document.getElementById('modalDlBtn');
+  if(btn){
+    btn.classList.add('done');
+    btn.querySelector('.dl-text').textContent='Downloaded! ✓';
+    btn.querySelector('.dl-icon').textContent='✓';
+    setTimeout(()=>{
+      btn.classList.remove('done');
+      btn.querySelector('.dl-text').textContent='Download PNG';
+      btn.querySelector('.dl-icon').textContent='⬇';
+    },2200);
+  }
+}
+
+function quickDL(emoji,name) {
+  const safe=(name||'sticker').replace(/[^a-z0-9]/gi,'_');
+  triggerDL(emojiCanvas(emoji,512),`sticker_${safe}.png`);
+  toast('⬇ Saved to Downloads!');
+}
+
+function downloadCategory() {
+  const list=getFiltered();
+  if(!list.length){ toast('No stickers to download!'); return; }
+  const prog=document.getElementById('dlProgress');
+  const bar =document.getElementById('dlBar');
+  const pct =document.getElementById('dlPct');
+  prog.classList.add('show'); let i=0;
+  function next() {
+    if(i>=list.length){
+      bar.style.width='100%'; pct.textContent='100%';
+      setTimeout(()=>{prog.classList.remove('show');bar.style.width='0%';},900);
+      toast(`✓ ${list.length} stickers saved!`); return;
+    }
+    const s=list[i]; const em=getVersionEmoji(s);
+    const safe=s.name.replace(/[^a-z0-9]/gi,'_');
+    triggerDL(emojiCanvas(em,512),`sticker_${safe}_${i+1}.png`);
+    i++; const p=Math.round(i/list.length*100);
+    bar.style.width=p+'%'; pct.textContent=p+'%';
+    setTimeout(next,150);
+  }
+  next();
+}
+
+function downloadAll() {
+  const prev=currentCat; currentCat=null;
+  const list=STICKERS;
+  const prog=document.getElementById('dlProgress');
+  const bar =document.getElementById('dlBar');
+  const pct =document.getElementById('dlPct');
+  prog.classList.add('show'); let i=0;
+  function next() {
+    if(i>=list.length){
+      bar.style.width='100%'; pct.textContent='100%';
+      setTimeout(()=>{prog.classList.remove('show');bar.style.width='0%';},900);
+      toast(`✓ All ${list.length} stickers saved!`); currentCat=prev; return;
+    }
+    const s=list[i]; const em=getVersionEmoji(s);
+    const safe=s.name.replace(/[^a-z0-9]/gi,'_');
+    triggerDL(emojiCanvas(em,512),`sticker_${safe}_${i+1}.png`);
+    i++; const p=Math.round(i/list.length*100);
+    bar.style.width=p+'%'; pct.textContent=p+'%';
+    setTimeout(next,150);
+  }
+  next();
+}
+
+// ── INIT ───────────────────────────────────────────────
+renderPacks();
+</script>
+</body>
+</html>
